@@ -38,7 +38,7 @@ mixin _\$${formNameNoDanglingUnderscore}Indexable on $formName {
       ''').join('\n')}
     }
   }
-  
+
   @override
   void operator []=(FormerField field, dynamic newValue) {
     switch (field.value) {
@@ -54,28 +54,24 @@ mixin _\$${formNameNoDanglingUnderscore}Indexable on $formName {
 /// All fields of [$formName]
 class $generatedFormerField extends FormerField {
   const $generatedFormerField._(int value) : super(value);
-  
+
   static const all = [${fields.map((field) => field.name).join(', ')}];
 
   ${fields.mapIndexed((i, field) => "static const ${field.name} = $generatedFormerField._($i);").join('\n')}
 }
 
 /// A [FormerSchema] that [$formName] needs to conform to.
-class $schemaName implements FormerSchema<$formName> {
+class $schemaName extends FormerSchema<$formName> {
   ${fields.map((field) => 'final ${validatorMap[field.type.element?.name ?? 'dynamic']} ${field.name};').join('\n')}
-  
+
   const $schemaName({
     ${fields.map((field) => 'required this.${field.name},').join('\n')}
   });
-  
+
   @override
-  bool validate($formName form) {
-    var isValid = true;
-
-    ${fields.map((field) => 'isValid = ${field.name}.validate(form.${field.name});').join('\n')}
-
-    return isValid;
-  }
+  bool validate($formName form) => [
+      ${fields.map((field) => '${field.name}.validate(form.${field.name}),').join('\n')}
+    ].every(fieldIsValid);
 }
 ''';
   }
