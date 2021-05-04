@@ -67,6 +67,19 @@ class $schemaName extends FormerSchema<$formName> {
   const $schemaName({
     ${fields.map((field) => 'required this.${field.name},').join('\n')}
   });
+  
+  @override
+  String errorOf(FormerField field) {
+    switch (field.value) {
+      ${fields.mapIndexed((i, field) => '''
+        case $i:
+          return ${field.name}.error;
+      ''').join('\n')}
+
+      default:
+        return '';
+    }
+  }
 
   @override
   bool validate($formName form) => [
