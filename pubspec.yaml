@@ -1,0 +1,13 @@
+name: former_gen
+description: Code generation for former.
+version: 0.0.1
+author: Kenneth
+homepage:
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  analyzer: ^1.0.0
+  build:
+  source_gen:

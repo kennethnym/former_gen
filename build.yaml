@@ -1,0 +1,8 @@
+builders:
+  former_builder:
+    import: "package:former_gen/former_gen_builders.dart"
+    builder_factories: [ "formerBuilder" ]
+    build_extensions: { ".dart": [ ".former.g.dart" ] }
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: [ "source_gen|combining_builder" ]
