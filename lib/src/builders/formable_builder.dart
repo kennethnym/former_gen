@@ -1,6 +1,8 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/src/builder/build_step.dart';
 import 'package:former_gen/src/annotations/formable.dart';
+import 'package:former_gen/src/constants.dart';
+import 'package:former_gen/src/utils/list_utils.dart';
 import 'package:source_gen/source_gen.dart';
 
 class FormableBuilder extends GeneratorForAnnotation<Formable> {
@@ -17,42 +19,63 @@ class FormableBuilder extends GeneratorForAnnotation<Formable> {
 
     _formableIgnoreTypeChecker = TypeChecker.fromRuntime(FormableIgnore);
 
-    final fields =
-        element.fields.where(_isNotIgnored).map((field) => field.name);
+    final fields = element.fields.where(_isNotIgnored).toList();
 
-    final baseFormName = element.name;
-    final formName = element.name.substring(0, baseFormName.length - 4);
-    final generatedFormerField = '${formName}Field';
+    final formName = element.name;
+    final formNameNoDanglingUnderscore =
+        element.name.startsWith('_') ? element.name.substring(1) : element.name;
+    final generatedFormerField = '${formNameNoDanglingUnderscore}Field';
+    final schemaName = '${formNameNoDanglingUnderscore}Schema';
 
     return '''
-/// All fields of [$generatedFormerField]
-class $formName extends $baseFormName implements FormerForm {
+mixin _\$${formNameNoDanglingUnderscore}Indexable on $formName {
   @override
   dynamic operator [](FormerField field) {
-    switch (field.fieldName) {
-      ${fields.map((field) => '''
-        case '$field':
-          return $field;
+    switch (field.value) {
+      ${fields.mapIndexed((i, field) => '''
+        case $i:
+          return ${field.name};
       ''').join('\n')}
     }
   }
   
   @override
   void operator []=(FormerField field, dynamic newValue) {
-    switch (field.fieldName) {
-      ${fields.map((field) => '''
-        case '$field':
-          $field = newValue;
+    switch (field.value) {
+      ${fields.mapIndexed((i, field) => '''
+        case $i:
+          ${field.name} = newValue;
           break;
       ''').join('\n')}
     }
   }
 }
 
+/// All fields of [$formName]
 class $generatedFormerField extends FormerField {
-  const $generatedFormerField._(String fieldName) : super(fieldName);
+  const $generatedFormerField._(int value) : super(value);
+  
+  static const all = [${fields.map((field) => field.name).join(', ')}];
 
-  ${fields.map((field) => "static const $field = $generatedFormerField._('$field');").join('\n')}
+  ${fields.mapIndexed((i, field) => "static const ${field.name} = $generatedFormerField._($i);").join('\n')}
+}
+
+/// A [FormerSchema] that [$formName] needs to conform to.
+class $schemaName implements FormerSchema<$formName> {
+  ${fields.map((field) => 'final ${validatorMap[field.type.element?.name ?? 'dynamic']} ${field.name};').join('\n')}
+  
+  const $schemaName({
+    ${fields.map((field) => 'required this.${field.name},').join('\n')}
+  });
+  
+  @override
+  bool validate($formName form) {
+    var isValid = true;
+
+    ${fields.map((field) => 'isValid = ${field.name}.validate(form.${field.name});').join('\n')}
+
+    return isValid;
+  }
 }
 ''';
   }
