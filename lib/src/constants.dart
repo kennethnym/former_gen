@@ -2,6 +2,8 @@
 /// a field of type [String] should be validated by a StringValidator.
 const validatorMap = <String, String>{
   'String': 'StringValidator',
-  'int': 'IntValidator',
+  'int': 'NumberValidator',
+  'double': 'NumberValidator',
+  'num': 'NumberValidator',
   'dynamic': 'Validator',
 };
