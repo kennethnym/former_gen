@@ -5,5 +5,6 @@ const validatorMap = <String, String>{
   'int': 'NumberValidator',
   'double': 'NumberValidator',
   'num': 'NumberValidator',
+  'bool': 'BoolValidator',
   'dynamic': 'Validator',
 };
