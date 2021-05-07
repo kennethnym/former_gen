@@ -31,6 +31,13 @@ class FormableBuilder extends GeneratorForAnnotation<Formable> {
 mixin _\$${formNameNoDanglingUnderscore}Indexable on $formName {
   @override
   dynamic operator [](FormerField field) {
+    if (field is! $generatedFormerField) {
+      throw ArgumentError(
+        '\$field cannot be used to index ${formNameNoDanglingUnderscore}'
+        'Do you mean to use $generatedFormerField instead?',
+      );
+    }
+
     switch (field.value) {
       ${fields.mapIndexed((i, field) => '''
         case $i:
@@ -41,6 +48,13 @@ mixin _\$${formNameNoDanglingUnderscore}Indexable on $formName {
 
   @override
   void operator []=(FormerField field, dynamic newValue) {
+    if (field is! $generatedFormerField) {
+      throw ArgumentError(
+        '\$field cannot be used to index ${formNameNoDanglingUnderscore}'
+        'Do you mean to use $generatedFormerField instead?',
+      );
+    }
+
     switch (field.value) {
       ${fields.mapIndexed((i, field) => '''
         case $i:
@@ -70,6 +84,13 @@ class $schemaName extends FormerSchema<$formName> {
   
   @override
   String errorOf(FormerField field) {
+    if (field is! $generatedFormerField) {
+      throw ArgumentError(
+        '\$field cannot be used to access ${formNameNoDanglingUnderscore}.'
+        'Do you mean to use $generatedFormerField instead?',
+      );
+    }
+
     switch (field.value) {
       ${fields.mapIndexed((i, field) => '''
         case $i:
