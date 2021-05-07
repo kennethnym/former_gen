@@ -2,13 +2,21 @@
 
 Code generation for former.
 
-## Getting Started
+## Usage
 
-This project is a starting point for a Dart
-[package](https://flutter.dev/developing-packages/),
-a library module containing code that can be shared easily across
-multiple Flutter or Dart projects.
+0. Make sure `build_runner` is installed.
+1. Annotate your form class with `@Formable`
+2. Add `part '<file-name>.g.dart';` before your class declaration
+3. Add `class YourForm = _YourForm with _$YourFormIndexable;`
+4. Run `flutter pub get build_runner build`
+5. A `.g.dart` file should be generated next to the file that contains your form class.
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.dev/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+## What's generated
+
+- A mixin that makes your form class "indexable" with the bracket operator.
+- An enum class that includes all the fields of your form.
+  They are used when you need to specify what field a particular
+  Former widget should control.
+- A schema class that you should create when using the `Former` widget.
+  Use it to describe the requirements of your form, using either the built-in validators
+  or create your own by implementing `Validator` class.
