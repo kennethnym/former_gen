@@ -31,7 +31,7 @@ class FormableBuilder extends GeneratorForAnnotation<Formable> {
     return '''
 mixin _\$${formNameNoDanglingUnderscore} on $formName {
   @override
-  final Map<FormerField, String> _fieldType = {
+  final Map<FormerField, String> fieldType = {
     ${fields.map((field) => _typeMapEntry(field, generatedFormerField)).join(',\n')}
   };
 
