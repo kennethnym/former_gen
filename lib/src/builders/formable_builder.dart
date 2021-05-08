@@ -28,7 +28,12 @@ class FormableBuilder extends GeneratorForAnnotation<Formable> {
     final schemaName = '${formNameNoDanglingUnderscore}Schema';
 
     return '''
-mixin _\$${formNameNoDanglingUnderscore}Indexable on $formName {
+mixin _\$${formNameNoDanglingUnderscore} on $formName {
+  @override
+  final Map<FormerField, String> fieldType = {
+    ${fields.map((field) => "$generatedFormerField.${field.name}: '${field.type.element?.name ?? 'dynamic'}'").join(',\n')}
+  };
+
   @override
   dynamic operator [](FormerField field) {
     if (field is! $generatedFormerField) {
