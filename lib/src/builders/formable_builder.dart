@@ -1,4 +1,5 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:build/src/builder/build_step.dart';
 import 'package:former_gen/src/annotations/formable.dart';
 import 'package:former_gen/src/constants.dart';
@@ -31,7 +32,7 @@ class FormableBuilder extends GeneratorForAnnotation<Formable> {
 mixin _\$${formNameNoDanglingUnderscore} on $formName {
   @override
   final Map<FormerField, String> fieldType = {
-    ${fields.map((field) => "$generatedFormerField.${field.name}: '${field.type.element?.name ?? 'dynamic'}'").join(',\n')}
+    ${fields.map((field) => _typeMapEntry(field, generatedFormerField)).join(',\n')}
   };
 
   @override
@@ -118,5 +119,15 @@ class $schemaName extends FormerSchema<$formName> {
   bool _isNotIgnored(FieldElement field) {
     final annotations = _formableIgnoreTypeChecker.annotationsOf(field);
     return annotations.isEmpty;
+  }
+
+  /// Generate an entry in fieldMap for [field].
+  String _typeMapEntry(FieldElement field, String generatedFormerField) {
+    final fieldName = field.name;
+    final typeName = field.type.element?.name ?? 'dynamic';
+    final nullabilitySuffix =
+        field.type.nullabilitySuffix == NullabilitySuffix.question ? '?' : '';
+
+    return "${generatedFormerField}.$fieldName: '$typeName$nullabilitySuffix'";
   }
 }
