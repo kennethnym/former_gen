@@ -9,7 +9,7 @@ import 'package:source_gen/source_gen.dart';
 class FormableBuilder extends GeneratorForAnnotation<Formable> {
   /// A [TypeChecker] that checks whether a given [Element] is annotated with
   /// [FormableIgnore].
-  late final TypeChecker _formableIgnoreTypeChecker;
+  final _formableIgnoreTypeChecker = TypeChecker.fromRuntime(FormableIgnore);
 
   @override
   String generateForAnnotatedElement(
@@ -17,8 +17,6 @@ class FormableBuilder extends GeneratorForAnnotation<Formable> {
     if (element.kind != ElementKind.CLASS || element is! ClassElement) {
       throw UnsupportedError('@Formable annotation only works on classes.');
     }
-
-    _formableIgnoreTypeChecker = TypeChecker.fromRuntime(FormableIgnore);
 
     final fields = element.fields.where(_isNotIgnored).toList();
 
@@ -82,7 +80,7 @@ class $generatedFormerField extends FormerField {
 
 /// A [FormerSchema] that [$formName] needs to conform to.
 class $schemaName extends FormerSchema<$formName> {
-  ${fields.map((field) => 'final ${validatorMap[field.type.element?.name ?? 'dynamic']} ${field.name};').join('\n')}
+  ${fields.map((field) => 'final ${validatorMap[field.type.element?.name ?? 'dynamic'] ?? 'Validator'} ${field.name};').join('\n')}
 
   const $schemaName({
     ${fields.map((field) => 'required this.${field.name},').join('\n')}
