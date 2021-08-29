@@ -1,4 +1,5 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:build/src/builder/build_step.dart';
 import 'package:former_gen/src/annotations/formable.dart';
 import 'package:former_gen/src/constants.dart';
@@ -28,9 +29,21 @@ class FormableBuilder extends GeneratorForAnnotation<Formable> {
     final schemaName = '${formNameNoDanglingUnderscore}Schema';
 
     return '''
-mixin _\$${formNameNoDanglingUnderscore}Indexable on $formName {
+mixin _\$${formNameNoDanglingUnderscore} on $formName {
+  @override
+  final Map<FormerField, String> fieldType = {
+    ${fields.map((field) => _typeMapEntry(field, generatedFormerField)).join(',\n')}
+  };
+
   @override
   dynamic operator [](FormerField field) {
+    if (field is! $generatedFormerField) {
+      throw ArgumentError(
+        '\$field cannot be used to index ${formNameNoDanglingUnderscore}'
+        'Do you mean to use $generatedFormerField instead?',
+      );
+    }
+
     switch (field.value) {
       ${fields.mapIndexed((i, field) => '''
         case $i:
@@ -41,6 +54,13 @@ mixin _\$${formNameNoDanglingUnderscore}Indexable on $formName {
 
   @override
   void operator []=(FormerField field, dynamic newValue) {
+    if (field is! $generatedFormerField) {
+      throw ArgumentError(
+        '\$field cannot be used to index ${formNameNoDanglingUnderscore}'
+        'Do you mean to use $generatedFormerField instead?',
+      );
+    }
+
     switch (field.value) {
       ${fields.mapIndexed((i, field) => '''
         case $i:
@@ -70,6 +90,13 @@ class $schemaName extends FormerSchema<$formName> {
   
   @override
   String errorOf(FormerField field) {
+    if (field is! $generatedFormerField) {
+      throw ArgumentError(
+        '\$field cannot be used to access ${formNameNoDanglingUnderscore}.'
+        'Do you mean to use $generatedFormerField instead?',
+      );
+    }
+
     switch (field.value) {
       ${fields.mapIndexed((i, field) => '''
         case $i:
@@ -92,5 +119,15 @@ class $schemaName extends FormerSchema<$formName> {
   bool _isNotIgnored(FieldElement field) {
     final annotations = _formableIgnoreTypeChecker.annotationsOf(field);
     return annotations.isEmpty;
+  }
+
+  /// Generate an entry in fieldMap for [field].
+  String _typeMapEntry(FieldElement field, String generatedFormerField) {
+    final fieldName = field.name;
+    final typeName = field.type.element?.name ?? 'dynamic';
+    final nullabilitySuffix =
+        field.type.nullabilitySuffix == NullabilitySuffix.question ? '?' : '';
+
+    return "${generatedFormerField}.$fieldName: '$typeName$nullabilitySuffix'";
   }
 }
